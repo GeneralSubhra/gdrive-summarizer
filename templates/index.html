@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GDrive Summarizer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@300;400;500&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+
+  <style>
+    :root {
+      --ink:      #0d0d14;
+      --paper:    #f5f2eb;
+      --cream:    #ede9df;
+      --accent:   #2a52be;
+      --accent2:  #8b2fc9;
+      --gold:     #c9973a;
+      --red:      #c0392b;
+      --green:    #1e7e50;
+      --muted:    #7a7a8c;
+      --border:   rgba(13,13,20,0.12);
+      --shadow:   0 4px 24px rgba(13,13,20,0.10);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { font-size: 16px; scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Instrument Sans', sans-serif;
+      background-color: var(--paper);
+      color: var(--ink);
+      min-height: 100vh;
+      background-image:
+        radial-gradient(ellipse 80% 60% at 70% -10%, rgba(42,82,190,0.07) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 40% at 0% 100%, rgba(139,47,201,0.05) 0%, transparent 50%);
+    }
+
+    /* ── HEADER ─────────────────────────────────────────────── */
+    header {
+      border-bottom: 1.5px solid var(--border);
+      padding: 0 clamp(1.5rem, 5vw, 4rem);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 64px;
+      position: sticky;
+      top: 0;
+      background: rgba(245,242,235,0.90);
+      backdrop-filter: blur(12px);
+      z-index: 100;
+    }
+
+    .logo {
+      display: flex;
+      align-items: baseline;
+      gap: 0.6rem;
+    }
+
+    .logo-icon {
+      width: 32px;
+      height: 32px;
+      background: var(--ink);
+      border-radius: 6px;
+      display: grid;
+      place-items: center;
+    }
+
+    .logo-icon svg { display: block; }
+
+    .logo-text {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.25rem;
+      color: var(--ink);
+      letter-spacing: -0.02em;
+    }
+
+    .logo-text span { color: var(--accent); }
+
+    nav { display: flex; gap: 1rem; align-items: center; }
+
+    .nav-link {
+      font-size: 0.83rem;
+      color: var(--muted);
+      text-decoration: none;
+      padding: 0.3rem 0.7rem;
+      border-radius: 4px;
+      transition: color 0.15s, background 0.15s;
+    }
+
+    .nav-link:hover { color: var(--ink); background: var(--cream); }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-family: 'Instrument Sans', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 600;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      padding: 0.55rem 1.2rem;
+      text-decoration: none;
+      transition: opacity 0.15s, transform 0.1s, box-shadow 0.15s;
+    }
+
+    .btn:active { transform: scale(0.97); }
+
+    .btn-primary {
+      background: var(--ink);
+      color: var(--paper);
+    }
+
+    .btn-primary:hover { opacity: 0.85; }
+
+    .btn-google {
+      background: #fff;
+      color: var(--ink);
+      border: 1.5px solid var(--border);
+      box-shadow: var(--shadow);
+    }
+
+    .btn-google:hover { box-shadow: 0 6px 32px rgba(13,13,20,0.15); }
+
+    .btn-outline {
+      background: transparent;
+      color: var(--ink);
+      border: 1.5px solid var(--border);
+    }
+
+    .btn-outline:hover { background: var(--cream); }
+
+    .btn-sm { padding: 0.35rem 0.8rem; font-size: 0.78rem; }
+
+    .btn-danger {
+      background: var(--red);
+      color: #fff;
+    }
+
+    /* ── MAIN LAYOUT ─────────────────────────────────────────── */
+    main {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: clamp(2rem, 5vw, 4rem) clamp(1.5rem, 5vw, 2rem);
+    }
+
+    /* ── HERO ─────────────────────────────────────────────────── */
+    .hero {
+      text-align: center;
+      margin-bottom: 3rem;
+      animation: fadeUp 0.6s ease both;
+    }
+
+    .hero-eyebrow {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.72rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 1rem;
+    }
+
+    .hero h1 {
+      font-family: 'DM Serif Display', serif;
+      font-size: clamp(2.4rem, 6vw, 3.8rem);
+      line-height: 1.08;
+      letter-spacing: -0.03em;
+      color: var(--ink);
+      margin-bottom: 1rem;
+    }
+
+    .hero h1 em {
+      font-style: italic;
+      color: var(--accent);
+    }
+
+    .hero-sub {
+      font-size: 1rem;
+      color: var(--muted);
+      max-width: 500px;
+      margin: 0 auto 2rem;
+      line-height: 1.65;
+    }
+
+    /* ── FLASH MESSAGES ───────────────────────────────────────── */
+    .flash-list { list-style: none; margin-bottom: 2rem; }
+
+    .flash {
+      padding: 0.75rem 1.1rem;
+      border-radius: 7px;
+      font-size: 0.88rem;
+      margin-bottom: 0.5rem;
+      border-left: 3px solid;
+      animation: slideIn 0.3s ease;
+    }
+
+    .flash-success { background: #e6f4ee; border-color: var(--green); color: #155a38; }
+    .flash-error   { background: #fde8e8; border-color: var(--red);   color: #7a1c1c; }
+    .flash-warning { background: #fef6e4; border-color: var(--gold);  color: #7a5010; }
+    .flash-info    { background: #eaf0fb; border-color: var(--accent); color: #1a3272; }
+
+    /* ── CARD ─────────────────────────────────────────────────── */
+    .card {
+      background: #fff;
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      padding: 2rem;
+      margin-bottom: 1.5rem;
+      box-shadow: var(--shadow);
+      animation: fadeUp 0.5s ease both;
+    }
+
+    .card-title {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.3rem;
+      letter-spacing: -0.02em;
+      margin-bottom: 0.3rem;
+    }
+
+    .card-subtitle {
+      font-size: 0.83rem;
+      color: var(--muted);
+      margin-bottom: 1.4rem;
+    }
+
+    /* ── AUTH SECTION ─────────────────────────────────────────── */
+    .auth-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+      animation: fadeUp 0.5s ease 0.1s both;
+    }
+
+    @media (max-width: 600px) { .auth-grid { grid-template-columns: 1fr; } }
+
+    .auth-status {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.88rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+    }
+
+    .status-dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+
+    .status-dot.connected { background: var(--green); box-shadow: 0 0 0 3px rgba(30,126,80,0.2); }
+    .status-dot.disconnected { background: var(--muted); }
+
+    /* ── PROCESS FORM ─────────────────────────────────────────── */
+    .form-group { margin-bottom: 1.2rem; }
+
+    label {
+      display: block;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--ink);
+      margin-bottom: 0.4rem;
+      letter-spacing: 0.01em;
+    }
+
+    .input-row {
+      display: flex;
+      gap: 0.6rem;
+    }
+
+    input[type="text"] {
+      flex: 1;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.85rem;
+      padding: 0.65rem 0.9rem;
+      border: 1.5px solid var(--border);
+      border-radius: 7px;
+      background: var(--paper);
+      color: var(--ink);
+      outline: none;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+
+    input[type="text"]:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(42,82,190,0.12);
+    }
+
+    .helper {
+      font-size: 0.77rem;
+      color: var(--muted);
+      margin-top: 0.35rem;
+    }
+
+    /* ── RESULTS TABLE ────────────────────────────────────────── */
+    .results-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.4rem;
+      flex-wrap: wrap;
+      gap: 0.8rem;
+    }
+
+    .results-count {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.78rem;
+      color: var(--muted);
+      background: var(--cream);
+      padding: 0.25rem 0.7rem;
+      border-radius: 20px;
+      border: 1px solid var(--border);
+    }
+
+    .download-row { display: flex; gap: 0.6rem; flex-wrap: wrap; }
+
+    /* ── SUMMARY TABLE ────────────────────────────────────────── */
+    .summary-table-wrap { overflow-x: auto; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.88rem;
+    }
+
+    thead th {
+      text-align: left;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.7rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      padding: 0.6rem 0.8rem;
+      border-bottom: 1.5px solid var(--border);
+    }
+
+    tbody tr {
+      border-bottom: 1px solid var(--border);
+      transition: background 0.12s;
+    }
+
+    tbody tr:hover { background: var(--cream); }
+    tbody tr:last-child { border-bottom: none; }
+
+    td {
+      padding: 1rem 0.8rem;
+      vertical-align: top;
+    }
+
+    .file-name {
+      font-weight: 600;
+      font-size: 0.9rem;
+      display: flex;
+      align-items: flex-start;
+      gap: 0.4rem;
+      margin-bottom: 0.3rem;
+    }
+
+    .file-link {
+      color: var(--accent);
+      text-decoration: none;
+      font-size: 0.75rem;
+      font-family: 'DM Mono', monospace;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.2rem;
+    }
+
+    .file-link:hover { text-decoration: underline; }
+
+    .summary-text {
+      color: #333344;
+      line-height: 1.65;
+      font-size: 0.87rem;
+    }
+
+    .meta-chip {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.72rem;
+      color: var(--muted);
+      background: var(--cream);
+      padding: 0.15rem 0.55rem;
+      border-radius: 4px;
+      white-space: nowrap;
+    }
+
+    /* ── EMPTY STATE ──────────────────────────────────────────── */
+    .empty-state {
+      text-align: center;
+      padding: 4rem 2rem;
+      color: var(--muted);
+    }
+
+    .empty-state .big-icon {
+      font-size: 3.5rem;
+      margin-bottom: 1rem;
+      opacity: 0.4;
+    }
+
+    .empty-state h3 {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.4rem;
+      color: var(--ink);
+      margin-bottom: 0.5rem;
+    }
+
+    .empty-state p { font-size: 0.88rem; }
+
+    /* ── HOW IT WORKS ─────────────────────────────────────────── */
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 1rem;
+      margin-top: 1.5rem;
+    }
+
+    .step {
+      background: var(--cream);
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      padding: 1.2rem;
+    }
+
+    .step-num {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.8rem;
+      color: var(--accent);
+      opacity: 0.35;
+      line-height: 1;
+      margin-bottom: 0.5rem;
+    }
+
+    .step-title {
+      font-weight: 600;
+      font-size: 0.9rem;
+      margin-bottom: 0.25rem;
+    }
+
+    .step-desc { font-size: 0.8rem; color: var(--muted); line-height: 1.5; }
+
+    /* ── FOOTER ───────────────────────────────────────────────── */
+    footer {
+      text-align: center;
+      padding: 2.5rem;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.72rem;
+      color: var(--muted);
+      border-top: 1px solid var(--border);
+      margin-top: 4rem;
+    }
+
+    /* ── ANIMATIONS ───────────────────────────────────────────── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(14px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateX(-10px); }
+      to   { opacity: 1; transform: translateX(0); }
+    }
+
+    /* ── SPINNER ──────────────────────────────────────────────── */
+    .spinner-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(245,242,235,0.85);
+      backdrop-filter: blur(6px);
+      z-index: 999;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 1.2rem;
+    }
+
+    .spinner-overlay.active { display: flex; }
+
+    .spinner {
+      width: 44px;
+      height: 44px;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    .spinner-label {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── MISC ─────────────────────────────────────────────────── */
+    .divider {
+      height: 1px;
+      background: var(--border);
+      margin: 2rem 0;
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.7rem;
+      padding: 0.15rem 0.55rem;
+      border-radius: 4px;
+      border: 1px solid;
+    }
+
+    .tag-blue  { color: var(--accent);  border-color: rgba(42,82,190,0.3);  background: rgba(42,82,190,0.06); }
+    .tag-purple{ color: var(--accent2); border-color: rgba(139,47,201,0.3); background: rgba(139,47,201,0.06); }
+  </style>
+</head>
+<body>
+
+  <!-- Loading overlay -->
+  <div class="spinner-overlay" id="spinner">
+    <div class="spinner"></div>
+    <span class="spinner-label">Summarizing documents… this may take a moment</span>
+  </div>
+
+  <!-- Header -->
+  <header>
+    <div class="logo">
+      <div class="logo-icon">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+          <rect x="2" y="2" width="5" height="6" rx="1" fill="white" opacity=".9"/>
+          <rect x="9" y="2" width="7" height="3" rx="1" fill="white" opacity=".6"/>
+          <rect x="9" y="7" width="7" height="3" rx="1" fill="white" opacity=".6"/>
+          <rect x="2" y="10" width="14" height="2.5" rx="1" fill="white" opacity=".4"/>
+          <rect x="2" y="14" width="10" height="2" rx="1" fill="white" opacity=".3"/>
+        </svg>
+      </div>
+      <span class="logo-text">GDrive<span>Σ</span></span>
+    </div>
+
+    <nav>
+      <a href="#how-it-works" class="nav-link">How it works</a>
+      {% if authenticated %}
+        <a href="/auth/logout" class="btn btn-outline btn-sm">Sign out</a>
+      {% else %}
+        <a href="/auth/login" class="btn btn-google btn-sm">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+            <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+            <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+            <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
+            <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+          </svg>
+          Connect Google
+        </a>
+      {% endif %}
+    </nav>
+  </header>
+
+  <main>
+
+    <!-- Flash messages -->
+    {% if flashes %}
+      <ul class="flash-list">
+        {% for flash in flashes %}
+          <li class="flash flash-{{ flash.category }}">{{ flash.message }}</li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+
+    <!-- Hero -->
+    <section class="hero">
+      <p class="hero-eyebrow">AI-powered document intelligence</p>
+      <h1>Summarize your<br><em>Google Drive</em> docs</h1>
+      <p class="hero-sub">
+        Connect your Drive, point to a folder, and get concise AI-generated
+        summaries of every document — in seconds.
+      </p>
+      <div style="display:flex;gap:.7rem;justify-content:center;flex-wrap:wrap;">
+        <span class="tag tag-blue">PDF</span>
+        <span class="tag tag-blue">DOCX</span>
+        <span class="tag tag-blue">TXT</span>
+        <span class="tag tag-purple">Google Docs</span>
+        <span class="tag tag-purple">Azure OpenAI</span>
+      </div>
+    </section>
+
+    <!-- Auth + Process Card -->
+    <div class="auth-grid">
+
+      <!-- Step 1: Authenticate -->
+      <div class="card" style="animation-delay:0.05s">
+        <div class="card-title">① Authenticate</div>
+        <div class="card-subtitle">Connect your Google account securely via OAuth2</div>
+
+        {% if authenticated %}
+          <div class="auth-status">
+            <span class="status-dot connected"></span>
+            Google Drive connected
+          </div>
+          <p style="font-size:.84rem;color:var(--muted);margin-bottom:1rem;">
+            You're signed in. Proceed to select a folder and process documents.
+          </p>
+          <a href="/auth/logout" class="btn btn-outline btn-sm">Disconnect account</a>
+        {% else %}
+          <div class="auth-status">
+            <span class="status-dot disconnected"></span>
+            Not connected
+          </div>
+          <p style="font-size:.84rem;color:var(--muted);margin-bottom:1rem;">
+            Sign in with Google to access your Drive files. We request read-only access.
+          </p>
+          <a href="/auth/login" class="btn btn-google">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
+              <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+              <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+              <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
+              <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+            </svg>
+            Sign in with Google
+          </a>
+        {% endif %}
+      </div>
+
+      <!-- Step 2: Process -->
+      <div class="card" style="animation-delay:0.1s">
+        <div class="card-title">② Process Folder</div>
+        <div class="card-subtitle">Enter a Drive folder ID and run summarization</div>
+
+        <form action="/process" method="POST" id="processForm">
+          <div class="form-group">
+            <label for="folder_id">Google Drive Folder ID</label>
+            <div class="input-row">
+              <input
+                type="text"
+                id="folder_id"
+                name="folder_id"
+                value="{{ folder_id }}"
+                placeholder="e.g. 1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs"
+                {% if not authenticated %}disabled{% endif %}
+              />
+              <button
+                type="submit"
+                class="btn btn-primary"
+                {% if not authenticated %}disabled style="opacity:.4;cursor:not-allowed;"{% endif %}
+                onclick="showSpinner()"
+              >
+                Run
+              </button>
+            </div>
+            <p class="helper">
+              Find the ID in your Drive folder URL:
+              <code style="font-family:'DM Mono',monospace;font-size:.75rem;">
+                drive.google.com/drive/folders/<strong>[ID HERE]</strong>
+              </code>
+            </p>
+          </div>
+        </form>
+
+        {% if not authenticated %}
+          <p style="font-size:.8rem;color:var(--muted);margin-top:.5rem;">
+            ← Connect your account first
+          </p>
+        {% endif %}
+      </div>
+
+    </div>
+
+    <!-- Results -->
+    {% if summaries %}
+      <div class="card" style="animation-delay:0.15s">
+        <div class="results-header">
+          <div>
+            <div class="card-title">Document Summaries</div>
+            <div class="card-subtitle" style="margin-bottom:0">
+              <span class="results-count">{{ summaries|length }} document{% if summaries|length != 1 %}s{% endif %}</span>
+            </div>
+          </div>
+          <div class="download-row">
+            <a href="/download/csv" class="btn btn-outline btn-sm">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              CSV
+            </a>
+            <a href="/download/pdf" class="btn btn-primary btn-sm">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              PDF Report
+            </a>
+          </div>
+        </div>
+
+        <div class="summary-table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th style="width:30%">File</th>
+                <th>Summary</th>
+                <th style="width:100px">Size</th>
+                <th style="width:110px">Processed</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for item in summaries %}
+              <tr>
+                <td>
+                  <div class="file-name">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;margin-top:2px;color:var(--accent)">
+                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                      <polyline points="14 2 14 8 20 8"/>
+                    </svg>
+                    {{ item.file_name }}
+                  </div>
+                  {% if item.web_link and item.web_link != '#' %}
+                    <a href="{{ item.web_link }}" target="_blank" class="file-link">
+                      Open in Drive ↗
+                    </a>
+                  {% endif %}
+                </td>
+                <td>
+                  <p class="summary-text">{{ item.summary }}</p>
+                </td>
+                <td>
+                  <span class="meta-chip">{{ "{:,}".format(item.char_count) }} ch</span>
+                </td>
+                <td>
+                  <span style="font-size:.78rem;color:var(--muted)">{{ item.processed_at }}</span>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    {% else %}
+      <div class="card" style="animation-delay:0.15s">
+        <div class="empty-state">
+          <div class="big-icon">📂</div>
+          <h3>No summaries yet</h3>
+          <p>Authenticate with Google and enter a folder ID above to get started.</p>
+        </div>
+      </div>
+    {% endif %}
+
+    <!-- How it works -->
+    <div class="divider"></div>
+    <section id="how-it-works">
+      <p class="hero-eyebrow" style="text-align:left;margin-bottom:.8rem">How it works</p>
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">01</div>
+          <div class="step-title">OAuth2 Login</div>
+          <div class="step-desc">Sign in with Google. We request read-only Drive access via secure OAuth2 flow.</div>
+        </div>
+        <div class="step">
+          <div class="step-num">02</div>
+          <div class="step-title">Folder Scan</div>
+          <div class="step-desc">All PDFs, DOCXs, TXTs, and Google Docs in the folder are listed and downloaded.</div>
+        </div>
+        <div class="step">
+          <div class="step-num">03</div>
+          <div class="step-title">Text Extraction</div>
+          <div class="step-desc">PyMuPDF and python-docx parse raw text from each document reliably.</div>
+        </div>
+        <div class="step">
+          <div class="step-num">04</div>
+          <div class="step-title">AI Summary</div>
+          <div class="step-desc">Azure OpenAI generates a 5–10 sentence summary capturing every document's key insights.</div>
+        </div>
+        <div class="step">
+          <div class="step-num">05</div>
+          <div class="step-title">Export</div>
+          <div class="step-desc">Download a formatted PDF report or CSV with all file names and summaries.</div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer>
+    GDrive Summarizer · Built with FastAPI + Azure OpenAI · Read-only Google Drive access
+  </footer>
+
+  <script>
+    function showSpinner() {
+      const form = document.getElementById('processForm');
+      const folderId = document.getElementById('folder_id').value.trim();
+      if (folderId) {
+        document.getElementById('spinner').classList.add('active');
+      }
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,28 @@
+# GDrive Summarizer — Python dependencies
+# Install with: pip install -r requirements.txt
+
+# Web framework (FastAPI)
+fastapi>=0.115.0
+uvicorn[standard]>=0.34.0
+jinja2>=3.1.0
+python-multipart>=0.0.18
+itsdangerous>=2.2.0
+
+# Google Auth & Drive
+google-auth>=2.28.0
+google-auth-oauthlib>=1.2.0
+google-api-python-client>=2.120.0
+
+# Document parsing
+pymupdf>=1.24.0          # PDF extraction (fitz)
+python-docx>=1.1.0       # DOCX extraction
+pdfplumber>=0.11.0       # PDF fallback parser
+
+# AI Summarization
+openai>=1.50.0                # Azure OpenAI SDK
+
+# PDF report generation
+reportlab>=4.1.0
+
+# Utilities
+python-dotenv>=1.0.0     # Load .env file
