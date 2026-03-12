@@ -29,6 +29,7 @@ gdrive-summarizer/
 ├── auth.py             # Google OAuth2 integration & token management
 ├── drive.py            # Google Drive API interaction
 ├── parser.py           # Document text extraction (PDF, DOCX, etc.)
+├── prompts.py          # Centralized AI prompt management
 ├── summarizer.py       # AI summarization (Azure OpenAI SDK)
 ├── templates/
 │   └── index.html      # Responsive Jinja2 web template
