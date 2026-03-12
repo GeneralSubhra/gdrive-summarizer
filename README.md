@@ -45,7 +45,7 @@ gdrive-summarizer/
 ### 1. Clone & Environment
 
 ```bash
-git clone https://github.com/your-username/gdrive-summarizer.git
+git clone https://github.com/GeneralSubhra/gdrive-summarizer.git
 cd gdrive-summarizer
 python -m venv .venv
 .venv\Scripts\activate      # Windows
