@@ -542,7 +542,6 @@
     </div>
 
     <nav>
-      <a href="#how-it-works" class="nav-link">How it works</a>
       {% if authenticated %}
         <a href="/auth/logout" class="btn btn-outline btn-sm">Sign out</a>
       {% else %}
@@ -743,38 +742,6 @@
       </div>
     {% endif %}
 
-    <!-- How it works -->
-    <div class="divider"></div>
-    <section id="how-it-works">
-      <p class="hero-eyebrow" style="text-align:left;margin-bottom:.8rem">How it works</p>
-      <div class="steps">
-        <div class="step">
-          <div class="step-num">01</div>
-          <div class="step-title">OAuth2 Login</div>
-          <div class="step-desc">Sign in with Google. We request read-only Drive access via secure OAuth2 flow.</div>
-        </div>
-        <div class="step">
-          <div class="step-num">02</div>
-          <div class="step-title">Folder Scan</div>
-          <div class="step-desc">All PDFs, DOCXs, TXTs, and Google Docs in the folder are listed and downloaded.</div>
-        </div>
-        <div class="step">
-          <div class="step-num">03</div>
-          <div class="step-title">Text Extraction</div>
-          <div class="step-desc">PyMuPDF and python-docx parse raw text from each document reliably.</div>
-        </div>
-        <div class="step">
-          <div class="step-num">04</div>
-          <div class="step-title">AI Summary</div>
-          <div class="step-desc">Azure OpenAI generates a 5–10 sentence summary capturing every document's key insights.</div>
-        </div>
-        <div class="step">
-          <div class="step-num">05</div>
-          <div class="step-title">Export</div>
-          <div class="step-desc">Download a formatted PDF report or CSV with all file names and summaries.</div>
-        </div>
-      </div>
-    </section>
 
   </main>
 

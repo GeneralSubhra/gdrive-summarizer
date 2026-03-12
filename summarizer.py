@@ -18,23 +18,7 @@ ENDPOINT = os.environ.get("AZURE_OPENAI_ENDPOINT", "")
 DEPLOYMENT = os.environ.get("AZURE_OPENAI_DEPLOYMENT", "gpt-4o")
 API_VERSION = os.environ.get("AZURE_OPENAI_API_VERSION", "2024-05-01-preview")
 
-SYSTEM_INSTRUCTION = (
-    "You are an expert document analyst. Produce clear, accurate, and professional "
-    "summaries of documents. Focus on the most important information: key arguments, "
-    "findings, decisions, or takeaways. Write in clear English using complete sentences. "
-    "Do not include meta-commentary about the document format or your own capabilities."
-)
-
-SUMMARY_PROMPT = """Please summarize the following document in 5–10 sentences.
-Focus on the main purpose, key points, conclusions, and any critical details
-a reader would need to understand the document without reading it in full.
-
-Document title: {file_name}
-
-Document content:
-{text}
-
-Summary:"""
+from prompts import SYSTEM_INSTRUCTION, SUMMARY_PROMPT
 
 
 def summarize_text(text: str, file_name: str = "document") -> str:
